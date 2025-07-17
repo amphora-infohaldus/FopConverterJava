@@ -1,0 +1,32 @@
+plugins {
+    id 'war'
+    id 'org.gretty' version '2.3.1'
+}
+
+version '1.0.0'
+
+sourceCompatibility = 11
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile group: 'org.springframework', name: 'spring-webmvc', version: '5.2.0.RELEASE'
+    compile group: 'org.springframework', name: 'spring-jdbc', version: '5.2.0.RELEASE'
+    compile group: 'org.springframework', name: 'spring-context', version: '5.2.1.RELEASE'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.0'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.10.0'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.10.0'
+    compile group: 'org.apache.xmlgraphics', name: 'fop', version: '2.3'
+    compile group: 'log4j', name: 'log4j', version: '1.2.17'
+    compileOnly 'org.projectlombok:lombok:1.18.10'
+    annotationProcessor 'org.projectlombok:lombok:1.18.10'
+}
+
+gretty {
+    contextPath = '/'
+    servletContainer = 'jetty9.4'
+}
