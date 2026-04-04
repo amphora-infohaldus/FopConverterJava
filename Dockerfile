@@ -1,7 +1,12 @@
 FROM eclipse-temurin:11-jdk AS build
 WORKDIR /app
 COPY . .
-RUN chmod +x gradlew && ./gradlew war --no-daemon
+# Remove gretty plugin (needs jcenter, only for local dev) and build WAR
+RUN chmod +x gradlew && \
+    sed -i "/org.gretty/d" build.gradle && \
+    sed -i "/gretty {/,/}/d" build.gradle && \
+    sed -i "/jcenter/d" build.gradle && \
+    ./gradlew war --no-daemon
 
 FROM tomcat:9-jre11-temurin
 RUN rm -rf /usr/local/tomcat/webapps/*
