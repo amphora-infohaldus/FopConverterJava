@@ -1,10 +1,9 @@
 FROM eclipse-temurin:11-jdk AS build
 WORKDIR /app
 COPY . .
-# Remove gretty plugin (needs jcenter, only for local dev) and build WAR
 RUN chmod +x gradlew && \
     sed -i "/org.gretty/d" build.gradle && \
-    sed -i "/gretty {/,/}/d" build.gradle && \
+    sed -i "/gretty/,/}/d" build.gradle && \
     sed -i "/jcenter/d" build.gradle && \
     ./gradlew war --no-daemon
 
