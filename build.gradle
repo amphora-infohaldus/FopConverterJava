@@ -5,6 +5,10 @@ plugins {
 
 version '1.0.0'
 
+war {
+    archiveFileName = 'conversionservice.war'
+}
+
 sourceCompatibility = 11
 
 repositories {
