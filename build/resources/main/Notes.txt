@@ -1,4 +1,0 @@
-Version 1.0.0 (08.11.2019):
-* to build the project open command line and type: gradlew war
-    - this creates a war file inside build/lib/
-* the project is optimized for use with Linux (Ubuntu) and Tomcat

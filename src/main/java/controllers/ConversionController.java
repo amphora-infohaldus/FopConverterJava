@@ -48,8 +48,6 @@ public class ConversionController {
             throw new RequestNotValidException(error);
         }
 
-        String convertedFile;
-        String originalFile;
         String tempdir = env.getProperty("tempDir");
 
         if (tempdir == null) {
@@ -57,21 +55,21 @@ public class ConversionController {
             throw new Exception("Cannot access tempDir property");
         }
 
-        try {
-            Path tempDir = Paths.get(tempdir);
-            System.out.println(tempDir.getFileName());
-            if (!Files.exists(tempDir)) {
-                boolean dirCreated = new File(tempdir).mkdir();
-                if (!dirCreated) {
-                    logger.debug("Could not create temp directory");
-                    throw new Exception("Could not create temp directory");
-                }
+        Path tempDir = Paths.get(tempdir);
+        if (!Files.exists(tempDir)) {
+            boolean dirCreated = new File(tempdir).mkdirs();
+            if (!dirCreated) {
+                logger.debug("Could not create temp directory");
+                throw new Exception("Could not create temp directory");
             }
+        }
 
-            originalFile = FileSavingUtil.getUniqueFileName(tempDir.toString(), request.getFromExtension());
+        String originalFile = FileSavingUtil.getUniqueFileName(tempDir.toString(), request.getFromExtension());
+        String convertedFile = originalFile
+                .replace("." + request.getFromExtension(), "." + request.getToExtension());
+
+        try {
             logger.info("original file: " + originalFile);
-            convertedFile = originalFile
-                    .replace("." + request.getFromExtension(), "." + request.getToExtension());
             logger.info("converted file: " + convertedFile);
 
             FileUtils.writeByteArrayToFile(new File(originalFile), request.getDataBytes());
@@ -89,21 +87,21 @@ public class ConversionController {
 
             if (fileConverted) {
                 byte[] content = FileUtils.readFileToByteArray(new File(convertedFile));
-                logger.info("File contents read to bytes. Lenght = " + content.length);
+                logger.info("File contents read to bytes. Length = " + content.length);
                 response.setFile(content);
                 response.setMessage("");
-                FileSavingUtil.deleteConvertedFiles(originalFile, convertedFile);
                 return new ResponseEntity<>(response, httpHeaders, HttpStatus.OK);
             } else {
                 logger.info("Conversion failed!");
                 response.setFile(null);
                 response.setMessage("Unable to convert document");
-                FileSavingUtil.deleteConvertedFiles(originalFile, convertedFile);
                 return new ResponseEntity<>(response, httpHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } catch (Exception e) {
             logger.debug(e.getMessage(), e);
             throw new Exception(e);
+        } finally {
+            FileSavingUtil.deleteConvertedFiles(originalFile, convertedFile);
         }
     }
 

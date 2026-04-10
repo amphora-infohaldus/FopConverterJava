@@ -64,58 +64,60 @@ public class FopConverter {
             return false;
         }
 
-        logger.info("Creating user agent");
-        FOUserAgent agent = fopFactory.newFOUserAgent();
-
-        // pdf
-        Fop fop;
         try {
-            fop = fopFactory.newFop("application/pdf", agent, outStream);
-            logger.info("Fop object created");
-        } catch (FOPException e) {
-            logger.debug(e.getMessage(), e);
-            return false;
+            logger.info("Creating user agent");
+            FOUserAgent agent = fopFactory.newFOUserAgent();
+
+            // pdf
+            Fop fop;
+            try {
+                fop = fopFactory.newFop("application/pdf", agent, outStream);
+                logger.info("Fop object created");
+            } catch (FOPException e) {
+                logger.debug(e.getMessage(), e);
+                return false;
+            }
+
+            TransformerFactory trFactory = TransformerFactory.newInstance();
+            logger.info("New transformerFactory created");
+
+            // xsl
+            Source xslSource = new StreamSource(isXsl);
+            Transformer transformer;
+            try {
+                transformer = trFactory.newTransformer(xslSource);
+                logger.info("new transformer object created");
+            } catch (TransformerConfigurationException e) {
+                logger.debug(e.getMessage(), e);
+                return false;
+            }
+
+            // xml
+            Source xmlSource = new StreamSource(new File(inputFile));
+            logger.info("Starting to convert ...");
+
+            // output
+            Result result;
+            try {
+                result = new SAXResult(fop.getDefaultHandler());
+                logger.info("SAXResult done");
+                transformer.transform(xmlSource, result);
+                logger.info("Transformation done");
+            } catch (FOPException | TransformerException | PDFConformanceException e) {
+                logger.debug(e.getMessage(), e);
+                return false;
+            }
+
+            logger.info("Converting successful");
+            return true;
+        } finally {
+            try {
+                outStream.close();
+                logger.info("Stream closed");
+            } catch (IOException e) {
+                logger.debug(e.getMessage(), e);
+            }
         }
-
-        TransformerFactory trFactory = TransformerFactory.newInstance();
-        logger.info("New transformerFactory created");
-
-        // xsl
-        Source xslSource = new StreamSource(isXsl);
-        Transformer transformer;
-        try {
-            transformer = trFactory.newTransformer(xslSource);
-            logger.info("new transformer object created");
-        } catch (TransformerConfigurationException e) {
-            logger.debug(e.getMessage(), e);
-            return false;
-        }
-
-        // xml
-        Source xmlSource = new StreamSource(new File(inputFile));
-        logger.info("Starting to convert ...");
-
-        // output
-        Result result;
-        try {
-            result = new SAXResult(fop.getDefaultHandler());
-            logger.info("SAXResult done");
-            transformer.transform(xmlSource, result);
-            logger.info("Transformation done");
-        } catch (FOPException | TransformerException | PDFConformanceException e) {
-            logger.debug(e.getMessage(), e);
-            return false;
-        }
-
-        try {
-            outStream.close();
-            logger.info("Stream closed");
-        } catch (IOException e) {
-            logger.debug(e.getMessage(), e);
-        }
-
-        logger.info("Converting successful");
-        return true;
     }
 
     private static boolean isFOP(byte[] xslBytes) {
