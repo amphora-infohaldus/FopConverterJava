@@ -15,10 +15,14 @@ RUN mkdir -p /tmp/fop-temp
 ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar /opt/opentelemetry-javaagent.jar
 
 ENV OTEL_SERVICE_NAME="fop-converter"
-ENV OTEL_EXPORTER_OTLP_ENDPOINT="http://alloy.telemetry.svc.cluster.local:4318"
 ENV OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
 ENV OTEL_LOGS_EXPORTER="otlp"
 ENV OTEL_METRICS_EXPORTER="otlp"
 ENV OTEL_TRACES_EXPORTER="otlp"
+# OTEL_EXPORTER_OTLP_ENDPOINT must be set at deploy time, e.g.:
+#   K8s internal:  http://alloy.telemetry.svc.cluster.local:4318
+#   Dev remote:    https://otel.dev.amphora.ee
+#   Prod remote:   https://otel.svc.amphora.ee
+# Remote endpoints require OTEL_EXPORTER_OTLP_HEADERS="Authorization=Bearer <token>"
 ENV CATALINA_OPTS="-Xms256m -Xmx512m -javaagent:/opt/opentelemetry-javaagent.jar"
 EXPOSE 8080
